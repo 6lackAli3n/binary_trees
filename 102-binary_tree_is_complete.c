@@ -2,58 +2,52 @@
 #include <stdlib.h>
 
 /**
- * binary_tree_is_complete - Checks if a binary tree is complete
- * @tree: A pointer to the root node of the tree to check
+ * binary_tree_is_complete - checks if a binary tree is complete
+ * @tree: pointer to the root node of the tree to check
  *
- * Return: 1 if the tree is complete, otherwise 0
+ * Return: 1 if the tree is complete, 0 otherwise
  */
 int binary_tree_is_complete(const binary_tree_t *tree)
 {
-	if (!tree)
-		return (0);
-
-	/* Create a queue for level-order traversal */
-	binary_tree_t **queue = malloc(sizeof(binary_tree_t *) * 100);
-	if (!queue)
-		return (0);
-
+	binary_tree_t **queue;
 	int front = 0, rear = 0;
-	const binary_tree_t *current;
 
-	/* Enqueue the root */
-	queue[rear++] = (binary_tree_t *)tree;
+	if (tree == NULL)
+		return (0);
 
-	/* Loop until the queue is empty */
-	while (front < rear)
+	queue = malloc(sizeof(binary_tree_t *) * 100);
+	if (queue == NULL)
+		return (0);
+
+	queue[rear] = (binary_tree_t *)tree;
+	rear = (rear + 1) % 100;
+
+	while (front != rear)
 	{
-		current = queue[front++];
+		binary_tree_t *current = queue[front];
 
-		/* If a NULL child is encountered, mark that a non-full node is found */
-		if (!current)
-			return (0);
+		front = (front + 1) % 100;
 
-		/* Enqueue the left child */
-		if (current->left)
-			queue[rear++] = (binary_tree_t *)current->left;
+		if (current == NULL)
+			break;
 
-		/* Enqueue the right child */
-		if (current->right)
-			queue[rear++] = (binary_tree_t *)current->right;
+		queue[rear] = current->left;
+		rear = (rear + 1) % 100;
+
+		queue[rear] = current->right;
+		rear = (rear + 1) % 100;
 	}
 
-	/* Check if all nodes are visited, except the last level */
-	while (rear > 1)
+	while (front != rear)
 	{
-		current = queue[--rear];
-
-		/* If a non-full node is encountered, the tree is not complete */
-		if (!current)
+		if (queue[front] != NULL)
+		{
+			free(queue);
 			return (0);
+		}
+		front = (front + 1) % 100;
 	}
 
-	/* Free the queue */
 	free(queue);
-
-	/* If no irregularities are found, the tree is complete */
 	return (1);
 }
